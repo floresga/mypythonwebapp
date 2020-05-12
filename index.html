@@ -1,0 +1,59 @@
+<html>
+<head>
+  <title>Example page</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular-resource.min.js"></script>
+</head>
+<body ng-app="ExampleApp">
+  <div ng-controller="ExampleController as exampleCtrl">
+    <h2>Users</h2>
+    <p>Here's a list of users and their email providers.</p>
+    <p>Filter list: <input ng-model="exampleCtrl.searchtext"></p>
+    <ul>
+      <li ng-repeat="user in exampleCtrl.users | filter : exampleCtrl.searchtext">
+        <name-display name="user.username"></name-display> ({{ user.email | provider }})
+      </li>
+    </ul>
+  </div>
+<script>
+// first, we define our angular module with dependencies
+angular
+.module('ExampleApp', ['ngResource'])
+
+// a basic controller for our app
+.controller('ExampleController', function($scope, Users) {
+    var vm = this;
+  
+    vm.searchtext = "";
+    vm.users = Users.query();
+})
+
+// a service for providing data with $resource, some example data from a public REST API
+.factory('Users', ['$resource', function($resource){
+    return $resource('https://jsonplaceholder.typicode.com/users', { query: '@query' });
+}])
+
+// a filter for getting the provider part from an email address
+.filter('provider', function($filter) {
+    return function(input) {
+        var out = "";
+        if (typeof input === 'string') {
+            var out = input.split("@")[1].toLowerCase();
+        }
+        return out;
+    };
+})
+
+// a custom directive for showing the user name in bold
+.directive('nameDisplay', function() {
+  return {
+    restrict: 'E',
+    scope: {
+      name: '='
+    },
+    template: '<strong>{{ name }}</strong>'
+  };
+});
+</script>
+</body>
+</html
